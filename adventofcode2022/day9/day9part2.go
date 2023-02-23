@@ -14,7 +14,7 @@ type Knot struct {
 const knots = 10
 
 func parttwo() int {
-	fileScanner, closer := util.NewScanner("testinput-large.txt")
+	fileScanner, closer := util.NewScanner("input-day9.txt")
 	defer closer.Close()
 
 	input := make([]string, 0)
@@ -63,20 +63,21 @@ func move(direction string, amount int, knotH Knot, visitedMap map[Position]int)
 		case "D":
 			knotH.position.y--
 		}
+
 		currentPrevKnot := knotH
-		j := 0
-		for j < knots {
+		for {
 			if currentPrevKnot.next == nil {
 				visitedMap[currentPrevKnot.position] = 1
 				break
 			}
 
-			xPosIsNotAdjacent := currentPrevKnot.position.x > currentPrevKnot.next.position.x+1 || currentPrevKnot.position.x < currentPrevKnot.next.position.x-1
-			yPosIsNotAdjacent := currentPrevKnot.position.y > currentPrevKnot.next.position.y+1 || currentPrevKnot.position.y < currentPrevKnot.next.position.y-1
+			xPosIsNotAdjacent := diff(currentPrevKnot.position.x, currentPrevKnot.next.position.x) > 1
+			yPosIsNotAdjacent := diff(currentPrevKnot.position.y, currentPrevKnot.next.position.y) > 1
 			knotPositionIsNotAdjacent := xPosIsNotAdjacent || yPosIsNotAdjacent
 
 			if !knotPositionIsNotAdjacent {
-				break
+				currentPrevKnot = *currentPrevKnot.next
+				continue
 			}
 
 			knotIsRightOfKnot := currentPrevKnot.position.x > currentPrevKnot.next.position.x
@@ -103,16 +104,22 @@ func move(direction string, amount int, knotH Knot, visitedMap map[Position]int)
 			} else if knotIsRightOfKnot && knotIsSameRow {
 				currentPrevKnot.next.position.x++
 			} else if knotIsLeftOfKnot && knotIsSameRow {
-				currentPrevKnot.position.x--
+				currentPrevKnot.next.position.x--
 			} else if knotIsSameColumn && knotIsAboveKnot {
 				currentPrevKnot.next.position.y++
 			} else if knotIsSameColumn && knotIsBelowKnot {
 				currentPrevKnot.next.position.y--
 			}
 			currentPrevKnot = *currentPrevKnot.next
-			j++
 		}
 		i++
 	}
 	return knotH
+}
+
+func diff(a, b int) int {
+	if a < b {
+		return b - a
+	}
+	return a - b
 }
